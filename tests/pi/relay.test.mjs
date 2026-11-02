@@ -129,6 +129,7 @@ suite("a child's permission ask on real pi", () => {
     const world = await relayWorld();
     const run = await runRpcParent(world, choose("Yes"));
     expect(run.dialogs.map(permissionTitle)).toEqual(["Permission Required (Subagent)"]);
+    expect(run.dialogs[0].title).toMatch(/subagent\s+: general-purpose · /);
     expect(run.dialogs[0].title).toContain("full command : echo probed >");
     expect(existsSync(world.marker)).toBe(true);
     expect(run.childReport).toContain("CHILD-DONE");
