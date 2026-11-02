@@ -20,6 +20,9 @@ const MAX_SPAWN_DEPTH = 3;
 // Names the session a child's permission asks go to. @gotgenes/pi-permission-system
 // relays them there while that session has a UI; without it a child answers them itself.
 const PARENT_SESSION_ENV = "PI_SUBAGENT_PARENT_SESSION";
+// The brief kept on the agent's record. A permission judge in this session reads it, with the
+// child's session id and cwd, to place a forwarded ask; a full copy is in the agent call.
+const BRIEF_CAP_BYTES = 8 * 1024;
 
 const endedStatus = Type.Union([Type.Literal("completed"), Type.Literal("failed"), Type.Literal("stopped")]);
 type EndedStatus = Static<typeof endedStatus>;
@@ -39,6 +42,8 @@ const identitySchema = Type.Object({
   sessionDir: Type.String(),
   systemPromptFile: Type.Optional(Type.String()),
   cwd: Type.String(),
+  // The first prompt the parent gave it, capped. Absent on a record an earlier version wrote.
+  brief: Type.Optional(Type.String()),
   worktree: Type.Optional(worktreeSchema),
   startedAt: Type.String(),
 });
@@ -242,6 +247,7 @@ export class AgentRunner {
       sessionDir,
       systemPromptFile,
       cwd: worktree?.path ?? ctx.cwd,
+      brief: truncateUtf8(params.prompt, BRIEF_CAP_BYTES),
       worktree,
       startedAt: now(),
     };

@@ -30,6 +30,25 @@ describe("agent tool", () => {
     });
   });
 
+  test("the persisted record carries the child's session id, cwd and brief, so a permission judge in this session can place a forwarded ask", async () => {
+    const { w, pi, ctx } = setup();
+    await pi.call("agent", { description: "brief", prompt: "run the parser tests, nothing else" }, ctx);
+    const [{ data }] = pi.entries;
+    expect(data.agent.sessionId).toBe(flag(w.invocations()[0], "--session-id"));
+    expect(data.agent.cwd).toBe(w.cwd);
+    expect(data.agent.brief).toBe("run the parser tests, nothing else");
+    // Every later write of the record keeps it.
+    expect(pi.entries.at(-1).data.agent.brief).toBe("run the parser tests, nothing else");
+  });
+
+  test("a long brief is capped on the record, at a character boundary", async () => {
+    const { pi, ctx } = setup();
+    await pi.call("agent", { description: "long", prompt: "é".repeat(20000) }, ctx);
+    const { brief } = pi.entries[0].data.agent;
+    expect(Buffer.byteLength(brief)).toBeLessThanOrEqual(8 * 1024);
+    expect(brief).toMatch(/^é+$/);
+  });
+
   test("readonly runs the child without the edit and write tools", async () => {
     const { w, pi, ctx } = setup();
     await pi.call("agent", { description: "r", prompt: "x", readonly: true }, ctx);
