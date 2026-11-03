@@ -9,8 +9,9 @@
 //
 // Without a transcripts path it scans every runtime's transcripts directory
 // that exists: Claude Code's projects under $CLAUDE_CONFIG_DIR, Codex's sessions
-// and archived_sessions under $CODEX_HOME, and Pi's sessions and pstack subagent
-// sessions under $PI_CODING_AGENT_DIR (defaults: ~/.claude, ~/.codex, ~/.pi/agent).
+// and archived_sessions under $CODEX_HOME, and Pi's sessions (pi-subagents children
+// included, under sessions/.../run-N/) and pstack subagent sessions under
+// $PI_CODING_AGENT_DIR (defaults: ~/.claude, ~/.codex, ~/.pi/agent).
 //
 // Every probe yields a Fact, { known: true, value } or { known: false }. A hold
 // bucket needs only its own fact; `safe` needs every fact known.

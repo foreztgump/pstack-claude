@@ -381,6 +381,27 @@ test("a Pi session in a second transcripts root marks the worktree it ran in as 
   expect(rowFor(rows, quiet).slice(6, 8)).toEqual(["-", "safe"]);
 });
 
+test("a pi-subagents child session under the parent's run directory marks the worktree it ran in", () => {
+  const fixture = createFixture();
+  const child = addWorktree(fixture, "subagent-child");
+  const piAgent = join(fixture.root, "pi-agent");
+  // pi-subagents writes a child's session under the parent session's directory: <parent slug>/<parent id>/<run id>/run-0/session.jsonl.
+  const session = join(piAgent, "sessions", "--home-u-repo--", "parent-id", "run-id", "run-0", "session.jsonl");
+  mkdirSync(dirname(session), { recursive: true });
+  writeFileSync(
+    session,
+    [
+      { type: "session", version: 3, id: "c", timestamp: "2026-10-01T00:00:00.000Z", cwd: child, parentSession: join(piAgent, "sessions", "--home-u-repo--", "parent.jsonl") },
+      { type: "message", id: "u1", parentId: null, timestamp: "2026-10-01T00:00:01.000Z", message: { role: "user", content: [{ type: "text", text: "Task: go" }] } },
+    ].map((entry) => JSON.stringify(entry)).join("\n") + "\n",
+  );
+  const transcripts = defaultTranscriptRoots({ env: { PI_CODING_AGENT_DIR: piAgent }, home: fixture.root });
+  expect(transcripts).toEqual([join(piAgent, "sessions")]);
+  const { rows, warnings } = runAudit(fixture, { transcripts });
+  expect(warnings).toEqual([]);
+  expect(rowFor(rows, child).slice(6, 8)).toEqual([ymd(Math.floor(Date.now() / 1000)), "verify-recent-chat"]);
+});
+
 for (const dir of ["sessions", "archived_sessions"]) {
   test(`a Codex session in ~/.codex/${dir} marks the worktree it ran in as a recent chat`, () => {
     const fixture = createFixture();
