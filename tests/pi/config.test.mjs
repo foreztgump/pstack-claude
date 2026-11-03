@@ -4,7 +4,7 @@ import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:f
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { checkEffort, defaultSettings, loadAgentTypes, parseSheet, readSheet } from "../../plugins/pstack/pi/config.ts";
+import { checkEffort, defaultSettings, depthOf, loadAgentTypes, parseSheet, readSheet } from "../../plugins/pstack/pi/config.ts";
 import { chmodDeniesReads } from "../session-hook-sheets.mjs";
 
 test("depth comes from the reader on each use and PI_CODING_AGENT_DIR moves the sheet", () => {
@@ -15,6 +15,14 @@ test("depth comes from the reader on each use and PI_CODING_AGENT_DIR moves the 
   expect(settings.depth).toBe(2);
   expect(settings.agentDir).toBe("/tmp/pi-agent-x");
   expect(defaultSettings(() => 0, {}).agentDir).toBe(join(homedir(), ".pi", "agent"));
+});
+
+test("a pi-subagents child counts as one layer down, and pstack's own flag wins", () => {
+  expect(depthOf(undefined, {})).toBe(0);
+  expect(depthOf(undefined, { PI_SUBAGENT_CHILD: "1" })).toBe(1);
+  expect(depthOf(undefined, { PI_SUBAGENT_CHILD: "0" })).toBe(0);
+  expect(depthOf("2", { PI_SUBAGENT_CHILD: "1" })).toBe(2);
+  expect(depthOf("1", {})).toBe(1);
 });
 
 test("only an exact pi ask tool: off line turns the ask tool off", () => {

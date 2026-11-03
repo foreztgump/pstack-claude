@@ -3,7 +3,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { registerAgentsCommand, registerAgentTools } from "./agent-tools.ts";
 import { AgentRunner } from "./agents.ts";
 import { registerAsk } from "./ask.ts";
-import { DEPTH_FLAG, defaultSettings, readSheet, type Settings } from "./config.ts";
+import { DEPTH_FLAG, defaultSettings, depthOf, readSheet, type Settings } from "./config.ts";
 import { registerOneShot } from "./one-shot.ts";
 import { registerPathSkills } from "./path-skills.ts";
 import { registerPromptSections } from "./prompt.ts";
@@ -41,5 +41,5 @@ export function install(pi: ExtensionAPI, settings: Settings): void {
 
 export default function pstack(pi: ExtensionAPI): void {
   pi.registerFlag(DEPTH_FLAG, { type: "string", description: "Layers below the main session; pstack sets it on the agents it starts." });
-  install(pi, defaultSettings(() => Number(pi.getFlag(DEPTH_FLAG)) || 0));
+  install(pi, defaultSettings(() => depthOf(pi.getFlag(DEPTH_FLAG), process.env)));
 }
