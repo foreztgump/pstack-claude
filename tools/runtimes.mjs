@@ -293,21 +293,26 @@ export function piModelNamesSection(models) {
     `| Alias | ${columns.map(code).join(" | ")} |\n| --- |${" --- |".repeat(columns.length)}\n` +
     models.available.map((alias) => `| ${code(alias)} | ${columns.map((p) => code(tables[p][alias])).join(" | ")} |`).join("\n");
   return (
-    "Skills name models by the Claude aliases in their Models sections. On Pi, pass the alias as the `agent` " +
-    "tool's `model`. The pstack extension resolves it in the column of the provider the session's current model " +
-    `comes from, and in the ${code(fallback)} column for any other provider:\n\n` +
+    "Skills name models by the Claude aliases in their Models sections. pi-subagents has no aliases: the " +
+    "`subagent` tool's `model` is an exact `provider/id` (a bare id resolves only when it is unique), so translate " +
+    "each alias before the call. Use the sheet's role value when it is already a full ID. Otherwise use the alias's " +
+    "entry in the sheet's `pi models:` line, and with no entry the column of this table for the provider the " +
+    `session's current model comes from, and in the ${code(fallback)} column for any other provider:\n\n` +
     table +
-    "\n\nPi warns that Anthropic bills Claude used through Pi per token, as extra usage, even on a Claude subscription. " +
-    "Pi shows that warning only in interactive mode, never for the `pi --mode rpc` children the `agent` tool runs.\n\n" +
-    "A `pi models: opus=<provider/id>, sonnet=<provider/id>` line in the Pi override sheet points each alias " +
-    "it names at another Pi model, whatever the session's provider. Add one when the session's provider has no " +
-    `column above and Pi has no credentials for ${code(fallback)}, because each alias then resolves to an ${code(`${fallback}/*`)} ` +
-    `ID and the ${code("agent")} call fails with ${code(`No API key found for ${fallback}`)}. ` +
-    "The `agent` tool also takes a full " +
-    "`provider/id`, passed through unchanged, and `inherit-parent`, `auto`, or no `model` runs the child on the " +
-    "parent's current model. Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`) " +
-    "stay diverse only while their aliases resolve to distinct models. If one model family is all you can reach, " +
-    "vary the reasoning effort and note in the verdict that diversity was reduced.\n\n" +
+    "\n\nA `pi models: opus=<provider/id>, sonnet=<provider/id>` line in the Pi override sheet points each alias " +
+    "it names at a Pi model, whatever the session's provider. It is the entry to use when the session's provider " +
+    `has no column above and Pi has no credentials for ${code(fallback)}. Pi warns that Anthropic bills Claude ` +
+    "used through Pi per token, as extra usage, even on a Claude subscription.\n\n" +
+    "`subagent` has no separate effort parameter. A role's `@<level>`, or the sheet's `default effort` level, becomes " +
+    "a suffix on the model: `gateway/glm-5.3:high`. `session` adds no suffix, so the child runs at its agent file's " +
+    "`thinking:`, else at the parent's current level. This profile caps thinking at `high`, so a higher level fails " +
+    "the launch. A skill's `effort` field is the same level.\n\n" +
+    "Omitting `model` runs the agent on the model its file names, not on the parent's model. A skill's " +
+    "`inherit-parent` or `auto` means the parent's model, so pass the parent's `provider/id`. An unknown or ambiguous model fails with the closest IDs, " +
+    "and `{ action: \"models\" }` lists every ID. Diverse-model panels (`arena`, `architect`, `interrogate`, " +
+    "`how` critics, `reflect`) stay diverse only while their models resolve to distinct IDs. A panel varies `model` " +
+    "across calls to one agent, not the agent. If one model family is all you can reach, vary the reasoning " +
+    "level and note in the verdict that diversity was reduced.\n\n" +
     "`/setup-pstack` writes the configured model list. On Pi, keep the aliases and remap them with `pi models:`."
   );
 }
