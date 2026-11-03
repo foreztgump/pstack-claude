@@ -306,12 +306,15 @@ export function piModelNamesSection(models) {
     "`subagent` has no separate effort parameter. A role's `@<level>`, or the sheet's `default effort` level, becomes " +
     "a suffix on the model: `gateway/glm-5.3:high`. `session` adds no suffix, so the child runs at its agent file's " +
     "`thinking:`, else at the parent's current level. This profile caps thinking at `high`, so a higher level fails " +
-    "the launch. A skill's `effort` field is the same level.\n\n" +
+    "the launch: keep sheet levels at `high` or below on Pi, even though `/setup-pstack` offers `xhigh` and `max`. " +
+    "When a skill's dispatch text says to pass an `effort`, put that level in the suffix instead.\n\n" +
     "Omitting `model` runs the agent on the model its file names, not on the parent's model. A skill's " +
-    "`inherit-parent` or `auto` means the parent's model, so pass the parent's `provider/id`. An unknown or ambiguous model fails with the closest IDs, " +
+    "`inherit-parent` or `auto` means the parent's model, so pass the parent's `provider/id`, with the role's " +
+    "`@<level>` as its suffix when the role carries one (`inherit-parent @high` is `<parent provider/id>:high`). An unknown or ambiguous model fails with the closest IDs, " +
     "and `{ action: \"models\" }` lists every ID. Diverse-model panels (`arena`, `architect`, `interrogate`, " +
-    "`how` critics, `reflect`) stay diverse only while their models resolve to distinct IDs. A panel varies `model` " +
-    "across calls to one agent, not the agent. If one model family is all you can reach, vary the reasoning " +
+    "`how` critics, `reflect`) stay diverse only while their models resolve to distinct IDs. Pass each seat's own " +
+    "`model` on its call, whichever agent the skill's row names for that seat; an agent file's pinned model is not " +
+    "what makes the panel diverse. If one model family is all you can reach, vary the reasoning " +
     "level and note in the verdict that diversity was reduced.\n\n" +
     "`/setup-pstack` writes the configured model list. On Pi, keep the aliases and remap them with `pi models:`."
   );
